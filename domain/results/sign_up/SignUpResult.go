@@ -1,13 +1,11 @@
 package sign_up
 
-import "AureliaReadsBackend/domain/entities"
-
 type SignUpResult interface {
 	sealed()
 }
 
 type Success struct {
-	Data entities.JwtTokens
+	Data any
 }
 
 func (s Success) sealed() {}

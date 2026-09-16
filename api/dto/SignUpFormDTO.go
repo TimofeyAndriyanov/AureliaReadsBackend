@@ -1,6 +1,6 @@
 package dto
 
-import "AureliaReadsBackend/domain/entities"
+import "github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/entities"
 
 type SignUpFormDTO struct {
 	FirstName string `json:"first_name"`

@@ -1,27 +1,24 @@
 package usecases
 
 import (
-	"AureliaReadsBackend/domain/entities"
-	"AureliaReadsBackend/domain/repository"
-	"AureliaReadsBackend/domain/results/sign_in"
-	"AureliaReadsBackend/domain/services"
+	"github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/entities"
+	"github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/repository"
+	"github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/results/sign_in"
+	"github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/services"
 )
 
 type SignInUseCase struct {
 	userRepository repository.UserRepository
 	hashService    services.HashService
-	jwtService     services.JwtService
 }
 
 func NewSignInUseCase(
 	userRepository repository.UserRepository,
 	hashService services.HashService,
-	jwtService services.JwtService,
-) SignInUseCase {
-	return SignInUseCase{
+) *SignInUseCase {
+	return &SignInUseCase{
 		userRepository: userRepository,
 		hashService:    hashService,
-		jwtService:     jwtService,
 	}
 }
 
@@ -36,17 +33,11 @@ func (uc *SignInUseCase) Execute(value entities.SignInForm) sign_in.SignInResult
 		return sign_in.UserNotFound{}
 	}
 
-	check := uc.hashService.HashChecking(credential.HashPassword, value.Password)
+	//check := uc.hashService.HashChecking(credential.HashPassword, value.Password)
 
-	if !check {
-		return sign_in.WrongPassword{}
-	}
+	//if !check {
+	//	return sign_in.WrongPassword{}
+	//}
 
-	tokens, err := uc.jwtService.NewJwt(credential.Id)
-
-	if err != nil {
-		return nil
-	}
-
-	return sign_in.Success{Data: *tokens}
+	return sign_in.Success{Data: nil}
 }

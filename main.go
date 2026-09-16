@@ -1,43 +1,53 @@
 package main
 
 import (
-	"AureliaReadsBackend/api"
-	"AureliaReadsBackend/data/repository"
-	"AureliaReadsBackend/data/services"
-	"AureliaReadsBackend/domain/usecases"
-	"log"
+	"errors"
+	"fmt"
+	"net/http"
 	"os"
+
+	articlesRepositoryImpl "github.com/TimofeyAndriyanov/AureliaReadsBackend/data/repository/articles"
+	userRepositoryImpl "github.com/TimofeyAndriyanov/AureliaReadsBackend/data/repository/user"
+	argon2IdServiceImpl "github.com/TimofeyAndriyanov/AureliaReadsBackend/data/services/argon2"
+	sha512ServiceImpl "github.com/TimofeyAndriyanov/AureliaReadsBackend/data/services/sha512"
+	"github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/usecases"
 )
 
 func main() {
-	jwtSecret := os.Getenv("JWT_SECRET")
+	host := os.Getenv("HOST")
 
-	jwtService := services.NewJwtService(jwtSecret)
-	hashService := services.NewHashService()
+	_ = os.Getenv("POSTGRES_HOST")
+	_ = os.Getenv("POSTGRES_USER")
+	_ = os.Getenv("POSTGRES_USER")
+	_ = os.Getenv("POSTGRES_PASSWORD")
+	_ = os.Getenv("POSTGRES_DB")
 
-	userRepository := repository.NewUserRepository()
-	articlesRepository := repository.NewArticlesRepository()
+	_ = sha512ServiceImpl.NewSHA512HashService()
+	argon2IdHashService := argon2IdServiceImpl.NewArgon2IdHashService()
 
-	signUpUseCase := usecases.NewSignUpUseCase(
+	userRepository := userRepositoryImpl.NewUserRepository()
+	_ = articlesRepositoryImpl.NewArticlesRepository()
+
+	_ = usecases.NewSignUpUseCase(
 		userRepository,
-		hashService,
-		jwtService,
+		argon2IdHashService,
 	)
 
-	signInUseCase := usecases.NewSignInUseCase(
+	_ = usecases.NewSignInUseCase(
 		userRepository,
-		hashService,
-		jwtService,
+		argon2IdHashService,
 	)
 
-	r := api.MainRoute(
-		signUpUseCase,
-		signInUseCase,
-		articlesRepository,
-		jwtService,
-	)
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Hello World"))
+	})
 
-	if err := r.Run(); err != nil {
-		log.Fatalf("failed to run server: %v", err)
+	err := http.ListenAndServe(host, nil)
+
+	if errors.Is(err, http.ErrServerClosed) {
+		fmt.Println("server stop")
+	} else {
+		fmt.Println(err)
 	}
+
 }

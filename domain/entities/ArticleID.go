@@ -3,7 +3,7 @@ package entities
 import (
 	"encoding/json"
 
-	"github.com/google/uuid"
+	"uuid"
 )
 
 type ArticleID uuid.UUID

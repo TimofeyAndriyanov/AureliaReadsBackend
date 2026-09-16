@@ -1,6 +1,6 @@
 package repository
 
-import "AureliaReadsBackend/domain/entities"
+import "github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/entities"
 
 type UserRepository interface {
 	AddUser(value entities.SignUpForm) entities.UserID

@@ -1,6 +1,6 @@
 package repository
 
-import "AureliaReadsBackend/domain/entities"
+import "github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/entities"
 
 type ArticlesRepository interface {
 	AddArticle(uid entities.UserID, article entities.NewArticle)

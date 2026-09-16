@@ -1,7 +1,7 @@
 package services
 
 type HashService interface {
-	Hashing(value string) string
+	Hashing(value string) []byte
 
-	HashChecking(hash string, value string) bool
+	HashChecking(hash []byte, value string) bool
 }
