@@ -8,6 +8,16 @@ import (
 
 type UserID uuid.UUID
 
+func ToUserID(s string) (*UserID, error) {
+	id, err := uuid.Parse(s)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return new(UserID(id)), nil
+}
+
 func (u UserID) String() string {
 	return uuid.UUID(u).String()
 }

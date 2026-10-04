@@ -1,8 +1,8 @@
-package repository
+package user
 
 import "github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/entities"
 
-type UserSessionRepository interface {
+type SessionRepository interface {
 	Add() error
 	DoesSessionExist(token entities.TokenHash) (bool, error)
 	GetSessionsByUserID(id entities.UserID) ([]entities.SessionItem, error)

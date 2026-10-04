@@ -2,18 +2,18 @@ package usecases
 
 import (
 	"github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/entities"
-	"github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/repository"
+	userRepo "github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/repository/user"
 	"github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/results/sign_in"
 	"github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/services"
 )
 
 type SignInUseCase struct {
-	userRepository repository.UserRepository
+	userRepository userRepo.Repository
 	hashService    services.HashService
 }
 
 func NewSignInUseCase(
-	userRepository repository.UserRepository,
+	userRepository userRepo.Repository,
 	hashService services.HashService,
 ) *SignInUseCase {
 	return &SignInUseCase{
@@ -27,11 +27,11 @@ func (uc *SignInUseCase) Execute(value entities.SignInForm) sign_in.SignInResult
 		return sign_in.EmptyFields{}
 	}
 
-	credential, ok := uc.userRepository.FindUserCredentialsByUsername(value.Username)
+	//credential, ok := uc.userRepository.FindUserCredentialsByUsername(value.Username)
 
-	if !ok && credential == nil {
-		return sign_in.UserNotFound{}
-	}
+	//if !ok && credential == nil {
+	//	return sign_in.UserNotFound{}
+	//}
 
 	//check := uc.hashService.HashChecking(credential.HashPassword, value.Password)
 

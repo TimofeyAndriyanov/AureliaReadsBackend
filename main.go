@@ -1,11 +1,10 @@
 package main
 
 import (
-	"errors"
-	"fmt"
-	"net/http"
+	"log/slog"
 	"os"
 
+	"github.com/TimofeyAndriyanov/AureliaReadsBackend/data/database"
 	articlesRepositoryImpl "github.com/TimofeyAndriyanov/AureliaReadsBackend/data/repository/articles"
 	userRepositoryImpl "github.com/TimofeyAndriyanov/AureliaReadsBackend/data/repository/user"
 	argon2IdServiceImpl "github.com/TimofeyAndriyanov/AureliaReadsBackend/data/services/argon2"
@@ -14,13 +13,25 @@ import (
 )
 
 func main() {
-	host := os.Getenv("HOST")
+	_ = os.Getenv("HOST")
+	_ = os.Getenv("PORT")
 
-	_ = os.Getenv("POSTGRES_HOST")
-	_ = os.Getenv("POSTGRES_USER")
-	_ = os.Getenv("POSTGRES_USER")
-	_ = os.Getenv("POSTGRES_PASSWORD")
-	_ = os.Getenv("POSTGRES_DB")
+	postgresHost := os.Getenv("POSTGRES_HOST")
+	postgresPort := os.Getenv("POSTGRES_PORT")
+	postgresUser := os.Getenv("POSTGRES_USER")
+	postgresPassword := os.Getenv("POSTGRES_PASSWORD")
+	postgresDb := os.Getenv("POSTGRES_DB")
+
+	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+
+	_, _ = database.NewDatabase(
+		postgresHost,
+		postgresPort,
+		postgresUser,
+		postgresPassword,
+		postgresDb,
+		logger,
+	)
 
 	_ = sha512ServiceImpl.NewSHA512HashService()
 	argon2IdHashService := argon2IdServiceImpl.NewArgon2IdHashService()
@@ -37,17 +48,4 @@ func main() {
 		userRepository,
 		argon2IdHashService,
 	)
-
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hello World"))
-	})
-
-	err := http.ListenAndServe(host, nil)
-
-	if errors.Is(err, http.ErrServerClosed) {
-		fmt.Println("server stop")
-	} else {
-		fmt.Println(err)
-	}
-
 }

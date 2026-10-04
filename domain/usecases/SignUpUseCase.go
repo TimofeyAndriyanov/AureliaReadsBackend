@@ -2,18 +2,18 @@ package usecases
 
 import (
 	"github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/entities"
-	"github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/repository"
+	userRepo "github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/repository/user"
 	"github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/results/sign_up"
 	"github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/services"
 )
 
 type SignUpUseCase struct {
-	userRepository repository.UserRepository
+	userRepository userRepo.Repository
 	hashService    services.HashService
 }
 
 func NewSignUpUseCase(
-	userRepository repository.UserRepository,
+	userRepository userRepo.Repository,
 	hashService services.HashService,
 ) *SignUpUseCase {
 	return &SignUpUseCase{
@@ -27,11 +27,11 @@ func (uc *SignUpUseCase) Execute(value entities.SignUpForm) sign_up.SignUpResult
 		return sign_up.EmptyFields{}
 	}
 
-	_, ok := uc.userRepository.FindUserCredentialsByUsername(value.Username)
+	//_, ok := uc.userRepository.FindUserCredentialsByUsername(value.Username)
 
-	if ok {
-		return sign_up.UserAlreadyExists{}
-	}
+	//if ok {
+	//	return sign_up.UserAlreadyExists{}
+	//}
 
 	//hashPassword := uc.hashService.Hashing(value.Password)
 

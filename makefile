@@ -1,11 +1,13 @@
 include .env
 export
 
+IMAGE_NAME := aurelia-reads-backend-image
+
 service-run:
 	@go run main.go
 
 docker-build:
-	@sudo docker build . -t aurelia-reads-backend-image
+	@sudo docker build . -t $(IMAGE_NAME)
 
 docker-run:
-	@sudo docker run aurelia-reads-backend-image
+	@sudo docker run -p ${PORT}:${PORT} $(IMAGE_NAME)
