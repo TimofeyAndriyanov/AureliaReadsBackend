@@ -1,6 +1,6 @@
 package dto
 
-import "AureliaReadsBackend/domain/entities"
+import "github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/entities"
 
 type ArticleDTO struct {
 	Id        entities.ArticleID `json:"id"`

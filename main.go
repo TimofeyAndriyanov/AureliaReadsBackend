@@ -1,43 +1,51 @@
 package main
 
 import (
-	"AureliaReadsBackend/api"
-	"AureliaReadsBackend/data/repository"
-	"AureliaReadsBackend/data/services"
-	"AureliaReadsBackend/domain/usecases"
-	"log"
+	"log/slog"
 	"os"
+
+	"github.com/TimofeyAndriyanov/AureliaReadsBackend/data/database"
+	articlesRepositoryImpl "github.com/TimofeyAndriyanov/AureliaReadsBackend/data/repository/articles"
+	userRepositoryImpl "github.com/TimofeyAndriyanov/AureliaReadsBackend/data/repository/user"
+	argon2IdServiceImpl "github.com/TimofeyAndriyanov/AureliaReadsBackend/data/services/argon2"
+	sha512ServiceImpl "github.com/TimofeyAndriyanov/AureliaReadsBackend/data/services/sha512"
+	"github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/usecases"
 )
 
 func main() {
-	jwtSecret := os.Getenv("JWT_SECRET")
+	_ = os.Getenv("HOST")
+	_ = os.Getenv("PORT")
 
-	jwtService := services.NewJwtService(jwtSecret)
-	hashService := services.NewHashService()
+	postgresHost := os.Getenv("POSTGRES_HOST")
+	postgresPort := os.Getenv("POSTGRES_PORT")
+	postgresUser := os.Getenv("POSTGRES_USER")
+	postgresPassword := os.Getenv("POSTGRES_PASSWORD")
+	postgresDb := os.Getenv("POSTGRES_DB")
 
-	userRepository := repository.NewUserRepository()
-	articlesRepository := repository.NewArticlesRepository()
+	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
-	signUpUseCase := usecases.NewSignUpUseCase(
+	_, _ = database.NewDatabase(
+		postgresHost,
+		postgresPort,
+		postgresUser,
+		postgresPassword,
+		postgresDb,
+		logger,
+	)
+
+	_ = sha512ServiceImpl.NewSHA512HashService()
+	argon2IdHashService := argon2IdServiceImpl.NewArgon2IdHashService()
+
+	userRepository := userRepositoryImpl.NewUserRepository()
+	_ = articlesRepositoryImpl.NewArticlesRepository()
+
+	_ = usecases.NewSignUpUseCase(
 		userRepository,
-		hashService,
-		jwtService,
+		argon2IdHashService,
 	)
 
-	signInUseCase := usecases.NewSignInUseCase(
+	_ = usecases.NewSignInUseCase(
 		userRepository,
-		hashService,
-		jwtService,
+		argon2IdHashService,
 	)
-
-	r := api.MainRoute(
-		signUpUseCase,
-		signInUseCase,
-		articlesRepository,
-		jwtService,
-	)
-
-	if err := r.Run(); err != nil {
-		log.Fatalf("failed to run server: %v", err)
-	}
 }

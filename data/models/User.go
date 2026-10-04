@@ -1,6 +1,6 @@
 package models
 
-import "AureliaReadsBackend/domain/entities"
+import "github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/entities"
 
 type User struct {
 	Id        entities.UserID

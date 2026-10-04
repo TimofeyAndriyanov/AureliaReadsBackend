@@ -1,105 +1,54 @@
 package routers
 
 import (
-	"AureliaReadsBackend/api/dto"
-	"AureliaReadsBackend/domain/results/sign_in"
-	"AureliaReadsBackend/domain/results/sign_up"
-	"AureliaReadsBackend/domain/usecases"
+	"encoding/json"
+	"log/slog"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
+	"github.com/TimofeyAndriyanov/AureliaReadsBackend/api/dto"
+	"github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/entities"
+	"github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/repository/log"
+	"github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/usecases"
 )
 
 type AuthHandler struct {
-	signInUseCase usecases.SignInUseCase
-	signUpUseCase usecases.SignUpUseCase
+	signInUseCase *usecases.SignInUseCase
+	signUpUseCase *usecases.SignUpUseCase
+	repository    log.Repository
+	logger        *slog.Logger
 }
 
 func NewAuthHandler(
-	signInUseCase usecases.SignInUseCase,
-	signUpUseCase usecases.SignUpUseCase,
+	signInUseCase *usecases.SignInUseCase,
+	signUpUseCase *usecases.SignUpUseCase,
+	repository log.Repository,
+	logger *slog.Logger,
 ) *AuthHandler {
 	return &AuthHandler{
 		signInUseCase: signInUseCase,
 		signUpUseCase: signUpUseCase,
+		logger:        logger,
 	}
 }
 
-func (h AuthHandler) AuthRouter(r *gin.RouterGroup) {
-	r.POST("/sign_in", h.signInRoute)
-	r.POST("/sign_up", h.signUpRoute)
+func (h AuthHandler) AuthRouter() {
+	http.HandleFunc("sign_in", h.signInRoute)
+	http.HandleFunc("sign_up", h.signUpRoute)
 }
 
-func (h AuthHandler) signInRoute(c *gin.Context) {
-	var signInForm dto.SignInFormDTO
+func (h AuthHandler) signInRoute(_ http.ResponseWriter, r *http.Request) {
+	var dest dto.SignInFormDTO
 
-	if err := c.ShouldBindJSON(&signInForm); err != nil {
-		return
-	}
-
-	switch result := h.signInUseCase.Execute(signInForm.ToDomain()).(type) {
-	case sign_in.Success:
-		c.JSON(
-			http.StatusOK,
-			gin.H{
-				"access":  result.Data.Access,
-				"refresh": result.Data.Refresh,
-			},
-		)
-	case sign_in.WrongPassword:
-		c.JSON(
-			http.StatusBadRequest,
-			gin.H{
-				"message": "Неправильный пароль.",
-			},
-		)
-	case sign_in.EmptyFields:
-		c.JSON(
-			http.StatusBadRequest,
-			gin.H{
-				"message": "Поля ввода пустые.",
-			},
-		)
-	case sign_in.UserNotFound:
-		c.JSON(
-			http.StatusNotFound,
-			gin.H{
-				"message": "Такого пользователя не существует.",
-			},
-		)
-
+	if jsonErr := json.NewDecoder(r.Body).Decode(&dest); jsonErr != nil {
+		h.repository.Add(entities.ERROR, "")
+		h.logger.Error("Ошибка сериализации тела запроса.", jsonErr)
 	}
 }
 
-func (h AuthHandler) signUpRoute(c *gin.Context) {
-	var signUpForm dto.SignUpFormDTO
+func (h AuthHandler) signUpRoute(_ http.ResponseWriter, r *http.Request) {
+	var dest dto.SignUpFormDTO
 
-	if err := c.ShouldBindJSON(&signUpForm); err != nil {
-		return
-	}
-
-	switch result := h.signUpUseCase.Execute(signUpForm.ToDomain()).(type) {
-	case sign_up.Success:
-		c.JSON(
-			http.StatusOK,
-			gin.H{
-				"access":  result.Data.Access,
-				"refresh": result.Data.Refresh,
-			},
-		)
-	case sign_up.UserAlreadyExists:
-		c.JSON(
-			http.StatusOK,
-			gin.H{
-				"access": "Такой пользователь уже существует.",
-			},
-		)
-	case sign_up.EmptyFields:
-		c.JSON(
-			http.StatusBadRequest,
-			gin.H{
-				"message": "Поля ввода пустые.",
-			},
-		)
+	if jsonErr := json.NewDecoder(r.Body).Decode(&dest); jsonErr != nil {
+		h.logger.Error("Ошибка сериализации тела запроса.", jsonErr)
 	}
 }
