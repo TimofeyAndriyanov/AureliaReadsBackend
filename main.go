@@ -44,15 +44,19 @@ func main() {
 	argon2IdHashService := argon2IdServiceImpl.NewArgon2IdHashService()
 
 	userRepository := userRepositoryImpl.NewUserRepository(db)
+	sessionRepository := userRepositoryImpl.NewSessionRepository(db)
+
 	_ = articlesRepositoryImpl.NewArticlesRepository(db)
 
 	_ = authUseCases.NewSignUpUseCase(
 		userRepository,
+		sessionRepository,
 		argon2IdHashService,
 	)
 
 	_ = authUseCases.NewSignInUseCase(
 		userRepository,
+		sessionRepository,
 		argon2IdHashService,
 	)
 }

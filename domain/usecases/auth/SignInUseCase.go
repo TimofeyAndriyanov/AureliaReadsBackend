@@ -1,6 +1,9 @@
 package usecases
 
 import (
+	"database/sql"
+	"errors"
+
 	"github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/entities"
 	userRepo "github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/repository/user"
 	"github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/results/sign_in"
@@ -8,17 +11,20 @@ import (
 )
 
 type SignInUseCase struct {
-	userRepository userRepo.Repository
-	hashService    services.HashService
+	userRepository    userRepo.Repository
+	sessionRepository userRepo.SessionRepository
+	hashService       services.HashService
 }
 
 func NewSignInUseCase(
 	userRepository userRepo.Repository,
+	sessionRepository userRepo.SessionRepository,
 	hashService services.HashService,
 ) *SignInUseCase {
 	return &SignInUseCase{
-		userRepository: userRepository,
-		hashService:    hashService,
+		userRepository:    userRepository,
+		sessionRepository: sessionRepository,
+		hashService:       hashService,
 	}
 }
 
@@ -27,17 +33,23 @@ func (uc *SignInUseCase) Execute(value entities.SignInForm) sign_in.SignInResult
 		return sign_in.EmptyFields{}
 	}
 
-	//credential, ok := uc.userRepository.FindUserCredentialsByUsername(value.Username)
+	credential, credentialErr := uc.userRepository.FindUserCredentialsByUsername(value.Username)
 
-	//if !ok && credential == nil {
-	//	return sign_in.UserNotFound{}
-	//}
+	if errors.Is(credentialErr, sql.ErrNoRows) {
+		return sign_in.UserNotFound{}
+	}
 
-	//check := uc.hashService.HashChecking(credential.HashPassword, value.Password)
+	ok := uc.hashService.HashChecking(credential.HashPassword, value.Password)
 
-	//if !check {
-	//	return sign_in.WrongPassword{}
-	//}
+	if !ok {
+		return sign_in.WrongPassword{}
+	}
 
-	return sign_in.Success{Data: nil}
+	token, tokenErr := uc.sessionRepository.Add(credential.Id, value.DeviceName)
+
+	if tokenErr != nil {
+		return sign_in.Unknown{}
+	}
+
+	return sign_in.Success{Data: token}
 }

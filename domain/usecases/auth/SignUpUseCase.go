@@ -1,6 +1,9 @@
 package usecases
 
 import (
+	"database/sql"
+	"errors"
+
 	"github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/entities"
 	userRepo "github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/repository/user"
 	"github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/results/sign_up"
@@ -8,17 +11,20 @@ import (
 )
 
 type SignUpUseCase struct {
-	userRepository userRepo.Repository
-	hashService    services.HashService
+	userRepository    userRepo.Repository
+	sessionRepository userRepo.SessionRepository
+	hashService       services.HashService
 }
 
 func NewSignUpUseCase(
 	userRepository userRepo.Repository,
+	sessionRepository userRepo.SessionRepository,
 	hashService services.HashService,
 ) *SignUpUseCase {
 	return &SignUpUseCase{
-		userRepository: userRepository,
-		hashService:    hashService,
+		userRepository:    userRepository,
+		sessionRepository: sessionRepository,
+		hashService:       hashService,
 	}
 }
 
@@ -27,21 +33,29 @@ func (uc *SignUpUseCase) Execute(value entities.SignUpForm) sign_up.SignUpResult
 		return sign_up.EmptyFields{}
 	}
 
-	//_, ok := uc.userRepository.FindUserCredentialsByUsername(value.Username)
+	credential, credentialErr := uc.userRepository.FindUserCredentialsByUsername(value.Username)
 
-	//if errors.Is() {
-	//	return sign_up.UserAlreadyExists{}
-	//}
+	if !errors.Is(credentialErr, sql.ErrNoRows) && credential != nil {
+		return sign_up.UserAlreadyExists{}
+	}
 
-	//hashPassword := uc.hashService.Hashing(value.Password)
+	hashPassword, hashPasswordErr := uc.hashService.Hashing(value.Password)
 
-	//newUser := uc.userRepository.AddUser(value.CopyPass(hashPassword))
+	if hashPasswordErr != nil {
+		return sign_up.Unknown{}
+	}
 
-	//tokens, err := uc.jwtService.NewJwt(newUser)
+	newUser, newUserErr := uc.userRepository.AddUser(value.CopyPass(hashPassword))
 
-	//if err != nil {
-	//	return nil
-	//}
+	if newUserErr != nil {
+		return sign_up.Unknown{}
+	}
 
-	return sign_up.Success{Data: nil}
+	token, tokenErr := uc.sessionRepository.Add(*newUser, value.DeviceName)
+
+	if tokenErr != nil {
+		return sign_up.Unknown{}
+	}
+
+	return sign_up.Success{Data: token}
 }
