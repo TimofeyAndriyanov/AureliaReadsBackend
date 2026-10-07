@@ -2,12 +2,12 @@ package api
 
 import (
 	articleRepo "github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/repository/article"
-	"github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/usecases"
+	authUseCases "github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/usecases/auth"
 )
 
 func MainRoute(
-	signUpUseCase *usecases.SignUpUseCase,
-	signInUseCase *usecases.SignInUseCase,
+	signUpUseCase *authUseCases.SignUpUseCase,
+	signInUseCase *authUseCases.SignInUseCase,
 	repository articleRepo.Repository,
 ) {
 

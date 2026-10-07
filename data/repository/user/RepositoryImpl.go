@@ -13,10 +13,10 @@ type repository struct {
 	context context.Context
 }
 
-func NewUserRepository(db *sql.DB, context context.Context) userRepo.Repository {
+func NewUserRepository(db *sql.DB) userRepo.Repository {
 	return &repository{
 		db:      db,
-		context: context,
+		context: context.Background(),
 	}
 }
 

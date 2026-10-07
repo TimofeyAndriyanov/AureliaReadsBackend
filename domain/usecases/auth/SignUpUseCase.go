@@ -29,7 +29,7 @@ func (uc *SignUpUseCase) Execute(value entities.SignUpForm) sign_up.SignUpResult
 
 	//_, ok := uc.userRepository.FindUserCredentialsByUsername(value.Username)
 
-	//if ok {
+	//if errors.Is() {
 	//	return sign_up.UserAlreadyExists{}
 	//}
 

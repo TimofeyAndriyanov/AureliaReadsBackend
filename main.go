@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"log/slog"
 	"os"
 
@@ -9,7 +10,7 @@ import (
 	userRepositoryImpl "github.com/TimofeyAndriyanov/AureliaReadsBackend/data/repository/user"
 	argon2IdServiceImpl "github.com/TimofeyAndriyanov/AureliaReadsBackend/data/services/argon2"
 	sha512ServiceImpl "github.com/TimofeyAndriyanov/AureliaReadsBackend/data/services/sha512"
-	"github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/usecases"
+	authUseCases "github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/usecases/auth"
 )
 
 func main() {
@@ -24,7 +25,7 @@ func main() {
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
-	_, _ = database.NewDatabase(
+	db, _ := database.NewDatabase(
 		postgresHost,
 		postgresPort,
 		postgresUser,
@@ -33,18 +34,24 @@ func main() {
 		logger,
 	)
 
+	defer func(db *sql.DB) {
+		if db.Close() != nil {
+			return
+		}
+	}(db)
+
 	_ = sha512ServiceImpl.NewSHA512HashService()
 	argon2IdHashService := argon2IdServiceImpl.NewArgon2IdHashService()
 
-	userRepository := userRepositoryImpl.NewUserRepository()
-	_ = articlesRepositoryImpl.NewArticlesRepository()
+	userRepository := userRepositoryImpl.NewUserRepository(db)
+	_ = articlesRepositoryImpl.NewArticlesRepository(db)
 
-	_ = usecases.NewSignUpUseCase(
+	_ = authUseCases.NewSignUpUseCase(
 		userRepository,
 		argon2IdHashService,
 	)
 
-	_ = usecases.NewSignInUseCase(
+	_ = authUseCases.NewSignInUseCase(
 		userRepository,
 		argon2IdHashService,
 	)
