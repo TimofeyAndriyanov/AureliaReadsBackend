@@ -6,28 +6,40 @@ import (
 	"net/http"
 
 	"github.com/TimofeyAndriyanov/AureliaReadsBackend/api/dto"
-	articleRepo "github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/repository/article"
+
+	usecases "github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/usecases/article"
 )
 
 type ArticleHandler struct {
-	repository articleRepo.Repository
-	logger     *slog.Logger
+	createArticle *usecases.CreateArticleUseCase
+	allArticle    *usecases.GetAllArticlesUseCase
+	findByArticle *usecases.FindArticleByIdUseCase
+	deleteArticle *usecases.DeleteArticleUseCase
+	logger        *slog.Logger
 }
 
 func NewArticleHandler(
-	repository articleRepo.Repository,
+	createArticle *usecases.CreateArticleUseCase,
+	allArticle *usecases.GetAllArticlesUseCase,
+	findByArticle *usecases.FindArticleByIdUseCase,
+	deleteArticle *usecases.DeleteArticleUseCase,
+	logger *slog.Logger,
 ) *ArticleHandler {
 	return &ArticleHandler{
-		repository: repository,
+		createArticle: createArticle,
+		allArticle:    allArticle,
+		findByArticle: findByArticle,
+		deleteArticle: deleteArticle,
+		logger:        logger,
 	}
 }
 
-func (h ArticleHandler) ArticleRouter() {
-	http.HandleFunc("articles", h.newArticle)
-	http.HandleFunc("articles", h.allArticles)
+func (h ArticleHandler) ArticleRouter(mux *http.ServeMux) {
+	mux.HandleFunc("articles", h.newArticle)
+	mux.HandleFunc("articles", h.allArticles)
 
-	http.HandleFunc("articles/{id}", h.getArticleById)
-	http.HandleFunc("articles/{id}", h.deleteArticleById)
+	mux.HandleFunc("articles/{id}", h.getArticleById)
+	mux.HandleFunc("articles/{id}", h.deleteArticleById)
 }
 
 func (h ArticleHandler) newArticle(w http.ResponseWriter, r *http.Request) {

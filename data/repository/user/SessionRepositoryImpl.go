@@ -7,5 +7,5 @@ import (
 )
 
 func NewSessionRepository(db *sql.DB) userRepo.SessionRepository {
-	panic("")
+	return nil
 }

@@ -1,9 +1,13 @@
 package article
 
-type FindArticleByIdUseCase struct{}
+import "github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/repository/article"
 
-func NewFindArticleByIdUseCase() *FindArticleByIdUseCase {
-	return &FindArticleByIdUseCase{}
+type FindArticleByIdUseCase struct {
+	repo article.Repository
+}
+
+func NewFindArticleByIdUseCase(repo article.Repository) *FindArticleByIdUseCase {
+	return &FindArticleByIdUseCase{repo: repo}
 }
 
 func (uc FindArticleByIdUseCase) Execute() {

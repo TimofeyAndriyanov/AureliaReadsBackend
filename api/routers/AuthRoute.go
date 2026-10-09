@@ -27,9 +27,9 @@ func NewAuthHandler(
 	}
 }
 
-func (h AuthHandler) AuthRouter() {
-	http.HandleFunc("sign_in", h.signInRoute)
-	http.HandleFunc("sign_up", h.signUpRoute)
+func (h AuthHandler) AuthRouter(mux *http.ServeMux) {
+	mux.HandleFunc("sign_in", h.signInRoute)
+	mux.HandleFunc("sign_up", h.signUpRoute)
 }
 
 func (h AuthHandler) signInRoute(_ http.ResponseWriter, r *http.Request) {

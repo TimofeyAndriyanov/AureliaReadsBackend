@@ -1,9 +1,13 @@
 package article
 
-type GetAllArticlesUseCase struct{}
+import "github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/repository/article"
 
-func NewGetAllArticlesUseCase() *GetAllArticlesUseCase {
-	return &GetAllArticlesUseCase{}
+type GetAllArticlesUseCase struct {
+	repo article.Repository
+}
+
+func NewGetAllArticlesUseCase(repo article.Repository) *GetAllArticlesUseCase {
+	return &GetAllArticlesUseCase{repo: repo}
 }
 
 func (uc GetAllArticlesUseCase) Execute() {
