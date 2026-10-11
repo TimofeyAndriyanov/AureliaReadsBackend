@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/TimofeyAndriyanov/AureliaReadsBackend/api/dto"
+	"github.com/TimofeyAndriyanov/AureliaReadsBackend/api/middleware"
 
 	usecases "github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/usecases/article"
 )
@@ -35,11 +36,23 @@ func NewArticleHandler(
 }
 
 func (h ArticleHandler) ArticleRouter(mux *http.ServeMux) {
-	mux.HandleFunc("articles", h.newArticle)
-	mux.HandleFunc("articles", h.allArticles)
+	mux.Handle(
+		"POST /api/articles",
+		middleware.AuthMiddleware(http.HandlerFunc(h.newArticle)),
+	)
 
-	mux.HandleFunc("articles/{id}", h.getArticleById)
-	mux.HandleFunc("articles/{id}", h.deleteArticleById)
+	mux.Handle(
+		"PATCH /api/articles/{id}",
+		middleware.AuthMiddleware(http.HandlerFunc(h.patch)),
+	)
+
+	mux.Handle(
+		"DELETE /api/articles/{id}",
+		middleware.AuthMiddleware(http.HandlerFunc(h.deleteArticleById)),
+	)
+
+	mux.HandleFunc("GET api/articles", h.allArticles)
+	mux.HandleFunc("GET api/articles/{id}", h.getArticleById)
 }
 
 func (h ArticleHandler) newArticle(w http.ResponseWriter, r *http.Request) {
@@ -51,14 +64,23 @@ func (h ArticleHandler) newArticle(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func (h ArticleHandler) allArticles(_ http.ResponseWriter, _ *http.Request) {
+
+}
+
 func (h ArticleHandler) getArticleById(_ http.ResponseWriter, _ *http.Request) {
 
 }
 
-func (h ArticleHandler) deleteArticleById(_ http.ResponseWriter, _ *http.Request) {
+func (h ArticleHandler) patch(resp http.ResponseWriter, r *http.Request) {
+	var dest dto.StatusFormDTO
 
+	if jsonErr := json.NewDecoder(r.Body).Decode(&dest); jsonErr != nil {
+		h.logger.Error("Ошибка сериализации тела запроса.", jsonErr)
+		resp.Write(nil)
+	}
 }
 
-func (h ArticleHandler) allArticles(_ http.ResponseWriter, _ *http.Request) {
+func (h ArticleHandler) deleteArticleById(_ http.ResponseWriter, _ *http.Request) {
 
 }

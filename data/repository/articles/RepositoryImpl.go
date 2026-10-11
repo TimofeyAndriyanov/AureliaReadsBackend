@@ -20,32 +20,6 @@ func NewArticlesRepository(db *sql.DB) articleRepo.Repository {
 	}
 }
 
-//
-// CREATE TABLE users(
-//     id UUID PRIMARY KEY DEFAULT random_uuid(),
-//     username TEXT UNIQUE NOT NULL,
-//     first_name TEXT NOT NULL,
-//     password_hash BYTEA NOT NULL,
-//     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
-// );
-//
-// CREATE TABLE user_sessions (
-//     id UUID PRIMARY KEY DEFAULT random_uuid(),
-//     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-//     token_hash BYTEA NOT NULL,
-//     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
-// );
-//
-// CREATE TABLE articles(
-//     id UUID PRIMARY KEY DEFAULT random_uuid(),
-//     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-//     title TEXT NOT NULL,
-//     content TEXT NOT NULL,
-//     is_hide BOOLEAN NOT NULL DEFAULT false,
-//     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
-// )
-//
-
 func (i repository) AddArticle(uid entities.UserID, article entities.NewArticle) error {
 	query := `
 		INSERT INTO articles(

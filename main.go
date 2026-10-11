@@ -44,12 +44,13 @@ func main() {
 	}
 
 	defer func(db *sql.DB) {
-		if db.Close() != nil {
+		if closeErr := db.Close(); closeErr != nil {
+			log.Fatal(closeErr)
 			return
 		}
 	}(db)
 
-	_ = sha512ServiceImpl.NewSHA512HashService()
+	sha512Service := sha512ServiceImpl.NewSHA512HashService()
 	argon2IdHashService := argon2IdServiceImpl.NewArgon2IdHashService()
 
 	userRepository := userRepositoryImpl.NewUserRepository(db)
@@ -61,12 +62,14 @@ func main() {
 		userRepository,
 		sessionRepository,
 		argon2IdHashService,
+		sha512Service,
 	)
 
 	signInUseCase := authUseCases.NewSignInUseCase(
 		userRepository,
 		sessionRepository,
 		argon2IdHashService,
+		sha512Service,
 	)
 
 	createArticleUseCase := articleUseCases.NewCreateArticleUseCase(articlesRepo)

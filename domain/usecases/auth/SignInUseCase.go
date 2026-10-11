@@ -3,6 +3,7 @@ package usecases
 import (
 	"database/sql"
 	"errors"
+	"log"
 
 	"github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/entities"
 	userRepo "github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/repository/user"
@@ -14,17 +15,20 @@ type SignInUseCase struct {
 	userRepository    userRepo.Repository
 	sessionRepository userRepo.SessionRepository
 	hashService       services.HashService
+	tokenHashService  services.HashService
 }
 
 func NewSignInUseCase(
 	userRepository userRepo.Repository,
 	sessionRepository userRepo.SessionRepository,
 	hashService services.HashService,
+	tokenHashService services.HashService,
 ) *SignInUseCase {
 	return &SignInUseCase{
 		userRepository:    userRepository,
 		sessionRepository: sessionRepository,
 		hashService:       hashService,
+		tokenHashService:  tokenHashService,
 	}
 }
 
@@ -44,12 +48,16 @@ func (uc *SignInUseCase) Execute(value entities.SignInForm) sign_in.SignInResult
 	if !ok {
 		return sign_in.WrongPassword{}
 	}
+	sessionToken, _ := entities.NewSessionToken()
 
-	token, tokenErr := uc.sessionRepository.Add(credential.Id, value.DeviceName)
+	tokenHash, _ := uc.tokenHashService.Hashing(string(sessionToken))
 
-	if tokenErr != nil {
+	sessionErr := uc.sessionRepository.Add(credential.Id, value.DeviceName, entities.TokenHash([]byte(tokenHash)))
+
+	if sessionErr != nil {
+		log.Fatal(sessionErr)
 		return sign_in.Unknown{}
 	}
 
-	return sign_in.Success{Data: token}
+	return sign_in.Success{Data: nil}
 }
