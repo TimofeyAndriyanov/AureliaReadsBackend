@@ -8,27 +8,27 @@ import (
 	userRepo "github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/repository/user"
 )
 
-type repository struct {
+type userRepository struct {
 	db      *sql.DB
 	context context.Context
 }
 
-func NewUserRepository(db *sql.DB, context context.Context) userRepo.Repository {
-	return &repository{
+func NewUserRepository(db *sql.DB) userRepo.Repository {
+	return &userRepository{
 		db:      db,
-		context: context,
+		context: context.Background(),
 	}
 }
 
-func (i repository) AddUser(value entities.SignUpForm) (*entities.UserID, error) {
+func (i userRepository) AddUser(value entities.SignUpForm) (*entities.UserID, error) {
 	var dest string
 
 	query := `
 		INSERT INTO users(
 			first_name,
 			username,
-			passwo
-			($1, $2, $3) RETURNING id
+			password_hash
+		) VALUES ($1, $2, $3) RETURNING id
 	`
 
 	if err := i.db.QueryRowContext(
@@ -45,7 +45,7 @@ func (i repository) AddUser(value entities.SignUpForm) (*entities.UserID, error)
 
 }
 
-func (i repository) FindUserCredentialsByUsername(username string) (*entities.UserCredential, error) {
+func (i userRepository) FindUserCredentialsByUsername(username string) (*entities.UserCredential, error) {
 	var dest *entities.UserCredential
 
 	query := `

@@ -6,13 +6,13 @@ import (
 )
 
 type CreateArticleUseCase struct {
-	repository article.Repository
+	repo article.Repository
 }
 
-func NewCreateArticleUseCase() *CreateArticleUseCase {
-	return &CreateArticleUseCase{}
+func NewCreateArticleUseCase(repo article.Repository) *CreateArticleUseCase {
+	return &CreateArticleUseCase{repo: repo}
 }
 
 func (uc CreateArticleUseCase) Execute(uid entities.UserID, value entities.NewArticle) {
-
+	uc.repo.AddArticle(uid, value)
 }
