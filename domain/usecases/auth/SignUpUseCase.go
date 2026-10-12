@@ -1,8 +1,6 @@
 package usecases
 
 import (
-	"database/sql"
-	"errors"
 	"log"
 
 	"github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/entities"
@@ -39,7 +37,14 @@ func (uc *SignUpUseCase) Execute(value entities.SignUpForm) sign_up.SignUpResult
 
 	credential, credentialErr := uc.userRepository.FindUserCredentialsByUsername(value.Username)
 
-	if !errors.Is(credentialErr, sql.ErrNoRows) && credential != nil {
+	if credentialErr != nil {
+		return sign_up.Unknown{}
+	}
+
+	log.Printf("SignUpUseCase FindUserCredentialsByUsername:", credential)
+
+	if credential != nil {
+		log.Printf("SignUpUseCase FindUserCredentialsByUsername:", credentialErr)
 		return sign_up.UserAlreadyExists{}
 	}
 
@@ -53,6 +58,7 @@ func (uc *SignUpUseCase) Execute(value entities.SignUpForm) sign_up.SignUpResult
 	newUser, newUserErr := uc.userRepository.AddUser(value.CopyPass(hashPassword))
 
 	if newUserErr != nil {
+		log.Printf("SignUpUseCase AddUser:", newUserErr)
 		log.Fatal(newUserErr)
 		return sign_up.Unknown{}
 	}

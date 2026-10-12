@@ -11,3 +11,6 @@ docker-build:
 
 docker-run:
 	@sudo docker run -p ${PORT}:${PORT} $(IMAGE_NAME)
+
+docker-stop:
+	@sudo docker kill $(IMAGE_NAME)

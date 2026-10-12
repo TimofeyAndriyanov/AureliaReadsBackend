@@ -1,8 +1,6 @@
 package usecases
 
 import (
-	"database/sql"
-	"errors"
 	"log"
 
 	"github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/entities"
@@ -39,7 +37,7 @@ func (uc *SignInUseCase) Execute(value entities.SignInForm) sign_in.SignInResult
 
 	credential, credentialErr := uc.userRepository.FindUserCredentialsByUsername(value.Username)
 
-	if errors.Is(credentialErr, sql.ErrNoRows) {
+	if credential == nil && credentialErr == nil {
 		return sign_in.UserNotFound{}
 	}
 
@@ -48,6 +46,7 @@ func (uc *SignInUseCase) Execute(value entities.SignInForm) sign_in.SignInResult
 	if !ok {
 		return sign_in.WrongPassword{}
 	}
+
 	sessionToken, _ := entities.NewSessionToken()
 
 	tokenHash, _ := uc.tokenHashService.Hashing(string(sessionToken))
@@ -59,5 +58,5 @@ func (uc *SignInUseCase) Execute(value entities.SignInForm) sign_in.SignInResult
 		return sign_in.Unknown{}
 	}
 
-	return sign_in.Success{Data: nil}
+	return sign_in.Success{Data: sessionToken}
 }

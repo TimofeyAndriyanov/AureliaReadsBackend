@@ -3,6 +3,8 @@ package user
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"log"
 
 	"github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/entities"
 	userRepo "github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/repository/user"
@@ -46,12 +48,12 @@ func (i userRepository) AddUser(value entities.SignUpForm) (*entities.UserID, er
 }
 
 func (i userRepository) FindUserCredentialsByUsername(username string) (*entities.UserCredential, error) {
-	var dest *entities.UserCredential
+	var dest entities.UserCredential
 
 	query := `
 		SELECT
 			id,
-			password
+			password_hash
 		FROM users WHERE username=$1
 	`
 
@@ -59,9 +61,15 @@ func (i userRepository) FindUserCredentialsByUsername(username string) (*entitie
 		i.context,
 		query,
 		username,
-	).Scan(&dest); err != nil {
+	).Scan(&dest.Id, &dest.HashPassword); err != nil {
+		log.Printf("userRepository FindUserCredentialsByUsername: %v", err)
+
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
+
 		return nil, err
 	}
 
-	return dest, nil
+	return &dest, nil
 }

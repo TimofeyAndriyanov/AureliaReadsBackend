@@ -2,6 +2,7 @@ package routers
 
 import (
 	"encoding/json"
+	"log"
 	"log/slog"
 	"net/http"
 
@@ -35,29 +36,57 @@ func (h AuthHandler) AuthRouter(mux *http.ServeMux) {
 	mux.HandleFunc("POST /api/sign_up", h.signUpRoute)
 }
 
-func (h AuthHandler) signInRoute(resp http.ResponseWriter, r *http.Request) {
+func (h AuthHandler) signInRoute(w http.ResponseWriter, r *http.Request) {
 	var dest dto.SignInFormDTO
 
 	if jsonErr := json.NewDecoder(r.Body).Decode(&dest); jsonErr != nil {
 		h.logger.Error("Ошибка сериализации тела запроса.", jsonErr)
-		resp.Write(nil)
+		w.Write(nil)
 	}
 
 	switch result := h.signInUseCase.Execute(dest.ToDomain()).(type) {
 	case signInResult.Success:
-		_ = result.Data
+		token := dto.ToDTO(result.Data)
+		log.Printf("signInRoute Token %v", token)
+		if err := json.NewEncoder(w).Encode(token); err != nil {
+			return
+		}
 
 	case signInResult.WrongPassword:
-		resp.Write(nil)
+		msg := dto.MessageDTO{
+			Message: "wrong_password",
+		}
+
+		if err := json.NewEncoder(w).Encode(msg); err != nil {
+			return
+		}
 
 	case signInResult.EmptyFields:
-		resp.Write(nil)
+		msg := dto.MessageDTO{
+			Message: "emply_fields",
+		}
+
+		if err := json.NewEncoder(w).Encode(msg); err != nil {
+			return
+		}
 
 	case signInResult.UserNotFound:
-		resp.Write(nil)
+		msg := dto.MessageDTO{
+			Message: "user_not_found",
+		}
+
+		if err := json.NewEncoder(w).Encode(msg); err != nil {
+			return
+		}
 
 	case signInResult.Unknown:
-		resp.Write(nil)
+		msg := dto.MessageDTO{
+			Message: "unknown",
+		}
+
+		if err := json.NewEncoder(w).Encode(msg); err != nil {
+			return
+		}
 
 	}
 }
@@ -66,14 +95,14 @@ func (h AuthHandler) signUpRoute(w http.ResponseWriter, r *http.Request) {
 	var dest dto.SignUpFormDTO
 
 	if jsonErr := json.NewDecoder(r.Body).Decode(&dest); jsonErr != nil {
-		h.logger.Error("Ошибка сериализации тела запроса.", jsonErr)
+		h.logger.Error("Ошибка сериализации тела запроса: %s", jsonErr)
 		return
 	}
 
 	switch result := h.signUpUseCase.Execute(dest.ToDomain()).(type) {
 	case signUpResult.Success:
 		token := dto.ToDTO(result.Data)
-
+		log.Printf("signUpRoute Token %v", token)
 		if err := json.NewEncoder(w).Encode(token); err != nil {
 			return
 		}
