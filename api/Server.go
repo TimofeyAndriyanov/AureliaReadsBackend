@@ -13,7 +13,7 @@ import (
 	"github.com/TimofeyAndriyanov/AureliaReadsBackend/api/utils"
 )
 
-func NewServer(host, port string, auth *routers.AuthHandler, article *routers.ArticleHandler) {
+func NewServer(host, port string, auth *routers.AuthHandler, article *routers.ArticleHandler, authMiddlewareHandler *middleware.AuthMiddlewareHandler) {
 	addr := net.JoinHostPort(host, port)
 
 	mux := http.NewServeMux()
@@ -35,7 +35,7 @@ func NewServer(host, port string, auth *routers.AuthHandler, article *routers.Ar
 	})
 
 	auth.AuthRouter(mux)
-	article.ArticleRouter(mux)
+	article.ArticleRouter(mux, authMiddlewareHandler)
 
 	log.Printf("Сервер успешно запущен на %s", addr)
 

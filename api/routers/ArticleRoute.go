@@ -35,7 +35,7 @@ func NewArticleHandler(
 	}
 }
 
-func (h ArticleHandler) ArticleRouter(mux *http.ServeMux) {
+func (h ArticleHandler) ArticleRouter(mux *http.ServeMux, middleware *middleware.AuthMiddlewareHandler) {
 	mux.Handle(
 		"POST /api/articles",
 		middleware.AuthMiddleware(http.HandlerFunc(h.newArticle)),
@@ -72,12 +72,12 @@ func (h ArticleHandler) getArticleById(_ http.ResponseWriter, _ *http.Request) {
 
 }
 
-func (h ArticleHandler) patch(resp http.ResponseWriter, r *http.Request) {
+func (h ArticleHandler) patch(w http.ResponseWriter, r *http.Request) {
 	var dest dto.StatusFormDTO
 
 	if jsonErr := json.NewDecoder(r.Body).Decode(&dest); jsonErr != nil {
 		h.logger.Error("Ошибка сериализации тела запроса.", jsonErr)
-		resp.Write(nil)
+		w.Write(nil)
 	}
 }
 

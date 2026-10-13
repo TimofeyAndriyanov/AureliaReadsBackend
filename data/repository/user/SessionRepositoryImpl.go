@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/entities"
 	userRepo "github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/repository/user"
@@ -51,6 +52,9 @@ func (i sessionRepository) DoesSessionExist(token entities.TokenHash) (*entities
 		query,
 		token,
 	).Scan(&dest); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
 		return nil, err
 	}
 

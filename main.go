@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/TimofeyAndriyanov/AureliaReadsBackend/api"
+	"github.com/TimofeyAndriyanov/AureliaReadsBackend/api/middleware"
 	"github.com/TimofeyAndriyanov/AureliaReadsBackend/api/routers"
 	"github.com/TimofeyAndriyanov/AureliaReadsBackend/data/database"
 	articlesRepositoryImpl "github.com/TimofeyAndriyanov/AureliaReadsBackend/data/repository/articles"
@@ -72,6 +73,11 @@ func main() {
 		sha512Service,
 	)
 
+	verifySessionTokenUseCase := authUseCases.NewVerifySessionTokenUseCase(
+		sha512Service,
+		sessionRepository,
+	)
+
 	createArticleUseCase := articleUseCases.NewCreateArticleUseCase(articlesRepo)
 	getAllArticlesUseCase := articleUseCases.NewGetAllArticlesUseCase(articlesRepo)
 	findArticleByIdUseCase := articleUseCases.NewFindArticleByIdUseCase(articlesRepo)
@@ -91,10 +97,13 @@ func main() {
 		logger,
 	)
 
+	authMiddlewareHandler := middleware.NewAuthMiddlewareHandler(verifySessionTokenUseCase)
+
 	api.NewServer(
 		host,
 		port,
 		authHandler,
 		articleHandler,
+		authMiddlewareHandler,
 	)
 }
