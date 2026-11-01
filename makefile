@@ -1,16 +1,37 @@
+.PHONY: run build start-bin clean help docker-build docker-run docker-stop
+
 include .env
 export
 
-IMAGE_NAME := aurelia-reads-backend-image
+.DEFAULT_GOAL := help
 
-service-run:
+APP_NAME=aurelia-reads
+IMAGE_NAME=$(APP_NAME)-backend-image
+
+run:
 	@go run main.go
 
-docker-build:
-	@sudo docker build . -t $(IMAGE_NAME)
+build:
+	@go build -o $(APP_NAME) main.go
 
-docker-run:
-	@sudo docker run -p ${PORT}:${PORT} $(IMAGE_NAME)
+start-bin:
+	@./$(APP_NAME)
 
-docker-stop:
-	@sudo docker kill $(IMAGE_NAME)
+clean:
+	@-rm -rf $(APP_NAME)
+
+docker-up:
+	@sudo docker compose up -d
+
+docker-down:
+	@sudo docker compose down
+
+help:
+	@echo "Доступные цели:"
+	@echo "  run         - Собрать и запустить"
+	@echo "  build       - Собрать и сохранить"
+	@echo "  start-bin   - Запустить бинарник"
+	@echo "  clean       - Удалить собранный бинарник"
+	@echo "  docker-up   - Поднять все контейнеры через docker-compose"
+	@echo "  docker-down - Остановить контейнеры"
+	@echo "  help        - Все доступные цели"

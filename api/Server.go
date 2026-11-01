@@ -13,8 +13,8 @@ import (
 	"github.com/TimofeyAndriyanov/AureliaReadsBackend/api/utils"
 )
 
-func NewServer(host, port string, auth *routers.AuthHandler, article *routers.ArticleHandler, authMiddlewareHandler *middleware.AuthMiddlewareHandler) {
-	addr := net.JoinHostPort(host, port)
+func NewServer(port string, auth *routers.AuthHandler, article *routers.ArticleHandler, authMiddlewareHandler *middleware.AuthMiddlewareHandler) {
+	addr := net.JoinHostPort("", port)
 
 	mux := http.NewServeMux()
 

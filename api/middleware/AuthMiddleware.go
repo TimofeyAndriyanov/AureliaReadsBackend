@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/TimofeyAndriyanov/AureliaReadsBackend/api/dto"
+	"github.com/TimofeyAndriyanov/AureliaReadsBackend/api/utils"
 	"github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/entities"
 	"github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/results/verify_session_token"
 	usecases "github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/usecases/auth"
@@ -46,9 +47,10 @@ func (h AuthMiddlewareHandler) AuthMiddleware(next http.Handler) http.Handler {
 
 		sessionToken := entities.SessionToken(tokenBytes)
 
-		switch h.usecase.Execute(sessionToken).(type) {
+		switch result := h.usecase.Execute(sessionToken).(type) {
 		case verify_session_token.Success:
-			next.ServeHTTP(w, r)
+			ctx := utils.WithUserID(r.Context(), result.Data)
+			next.ServeHTTP(w, r.WithContext(ctx))
 
 		case verify_session_token.Failed:
 			respondUnauthorized(w)

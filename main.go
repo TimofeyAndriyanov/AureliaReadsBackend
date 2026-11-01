@@ -19,7 +19,6 @@ import (
 )
 
 func main() {
-	host := os.Getenv("HOST")
 	port := os.Getenv("PORT")
 
 	postgresHost := os.Getenv("POSTGRES_HOST")
@@ -100,7 +99,6 @@ func main() {
 	authMiddlewareHandler := middleware.NewAuthMiddlewareHandler(verifySessionTokenUseCase)
 
 	api.NewServer(
-		host,
 		port,
 		authHandler,
 		articleHandler,

@@ -11,5 +11,5 @@ func NewGetAllArticlesUseCase(repo article.Repository) *GetAllArticlesUseCase {
 }
 
 func (uc GetAllArticlesUseCase) Execute() {
-
+	uc.repo.AllArticles()
 }

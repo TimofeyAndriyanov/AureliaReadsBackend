@@ -40,12 +40,12 @@ func (uc VerifySessionTokenUseCase) Execute(token entities.SessionToken) verify_
 		return verify_session_token.Failed{}
 	}
 
-	_, err := uc.sessions.DoesSessionExist(entities.TokenHash(tokenBytes))
+	id, err := uc.sessions.DoesSessionExist(entities.TokenHash(tokenBytes))
 
 	if err != nil {
 		log.Printf("VerifySessionTokenUseCase err: %v", err)
 		return verify_session_token.Failed{}
 	}
 
-	return verify_session_token.Success{}
+	return verify_session_token.Success{Data: *id}
 }

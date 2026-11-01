@@ -1,9 +1,20 @@
-FROM golang:1.27.1-bookworm
+# Первый этап
+FROM golang:1.27.1-alpine AS builder
 
 WORKDIR /app
 
+COPY go.mod go.sum ./
+RUN go mod download
+
 COPY . .
 
-RUN go mod tidy
+RUN CGO_ENABLED=0 GOOS=linux go build -o aurelia-reads main.go
 
-CMD ["make", "service-run"]
+# Второй этап
+FROM alpine:3.24.3
+
+WORKDIR /app
+
+COPY --from=builder /app/aurelia-reads ./aurelia-reads
+
+CMD ["./aurelia-reads"]

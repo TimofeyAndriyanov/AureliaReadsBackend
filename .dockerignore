@@ -1,0 +1,7 @@
+.git
+.env
+aurelia-reads
+.env.example
+LICENSE
+README.md
+makefile

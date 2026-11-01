@@ -7,6 +7,7 @@ import (
 
 	"github.com/TimofeyAndriyanov/AureliaReadsBackend/api/dto"
 	"github.com/TimofeyAndriyanov/AureliaReadsBackend/api/middleware"
+	"github.com/TimofeyAndriyanov/AureliaReadsBackend/api/utils"
 
 	usecases "github.com/TimofeyAndriyanov/AureliaReadsBackend/domain/usecases/article"
 )
@@ -62,6 +63,13 @@ func (h ArticleHandler) newArticle(w http.ResponseWriter, r *http.Request) {
 		h.logger.Error("Ошибка сериализации тела запроса.", jsonErr)
 	}
 
+	id, ok := utils.UserID(r.Context())
+
+	if !ok {
+
+	}
+
+	h.createArticle.Execute(id, dest.ToDomain())
 }
 
 func (h ArticleHandler) allArticles(_ http.ResponseWriter, _ *http.Request) {
@@ -78,6 +86,12 @@ func (h ArticleHandler) patch(w http.ResponseWriter, r *http.Request) {
 	if jsonErr := json.NewDecoder(r.Body).Decode(&dest); jsonErr != nil {
 		h.logger.Error("Ошибка сериализации тела запроса.", jsonErr)
 		w.Write(nil)
+	}
+
+	_, ok := utils.UserID(r.Context())
+
+	if !ok {
+
 	}
 }
 
