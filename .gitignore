@@ -1,4 +1,4 @@
-/.vscode
-/.idea
-/.env
-/aurelia-reads
+.vscode
+.idea
+.env
+bin/aurelia-reads-backend

@@ -1,6 +1,6 @@
 .git
 .env
-aurelia-reads
+bin/aurelia-reads-baclend
 .env.example
 LICENSE
 README.md

@@ -7,14 +7,14 @@ type SignUpForm struct {
 	DeviceName string
 }
 
-func (f *SignUpForm) IsEmpty() bool {
+func (f SignUpForm) IsEmpty() bool {
 	if len(f.FirstName) == 0 && len(f.Username) == 0 && len(f.Password) == 0 && len(f.DeviceName) == 0 {
 		return true
 	}
 	return false
 }
 
-func (f *SignUpForm) CopyPass(password string) SignUpForm {
+func (f SignUpForm) CopyPass(password string) SignUpForm {
 	return SignUpForm{
 		FirstName:  f.FirstName,
 		Username:   f.Username,
